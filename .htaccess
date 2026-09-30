@@ -1,0 +1,39 @@
+Options -Indexes
+DirectoryIndex index.html
+
+# Acentos corretos em robots.txt, llms.txt e sitemap.xml
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .txt .xml .html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Força HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Endereços que não existem voltam para a página inicial
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Compressão
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache: arquivos de /assets têm hash no nome e podem ficar em cache por 1 ano;
+# o index.html é sempre revalidado para pegar novas versões do site.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(jpe?g|png|svg|avif|webp|ico)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
